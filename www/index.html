@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>OSP PDF Toolkit</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:sans-serif;background:#0F1620;color:#E9EEF2;}
+  header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #2B3948;}
+  main{padding:16px;min-height:70vh;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#17212B;border-top:1px solid #2B3948;}
+  nav button{flex:1;padding:12px 0;background:none;border:none;color:#8CA0AF;font-size:13px;}
+  nav button.active{color:#F2A93B;font-weight:600;}
+  .placeholder{color:#8CA0AF;font-size:14px;padding:30px 0;text-align:center;}
+</style>
+</head>
+<body>
+<header>OSP PDF Toolkit</header>
+
+<main>
+  <div class="tab-content active" id="tab-pdf">
+    <p class="placeholder">PDF ke tools yahan aayenge (Images se PDF, Merge, Split, waghera)</p>
+  </div>
+  <div class="tab-content" id="tab-resize">
+    <p class="placeholder">Resize ke tools yahan aayenge</p>
+  </div>
+  <div class="tab-content" id="tab-compress">
+    <p class="placeholder">Compress ke tools yahan aayenge</p>
+  </div>
+</main>
+
+<nav>
+  <button class="active" data-tab="pdf">PDF</button>
+  <button data-tab="resize">Resize</button>
+  <button data-tab="compress">Compress</button>
+</nav>
+
+<script>
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
