@@ -31,6 +31,10 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Add AdMob App ID to AndroidManifest
+        run: |
+          sed -i 's#</application>#    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-1247625335902562~3475213673"/>\n    </application>#' android/app/src/main/AndroidManifest.xml
+
       - name: Build APK
         run: |
           cd android
