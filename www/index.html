@@ -4,48 +4,689 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>OSP PDF Toolkit</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:sans-serif;background:#0F1620;color:#E9EEF2;}
-  header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #2B3948;}
-  main{padding:16px;min-height:70vh;}
-  .tab-content{display:none;}
-  .tab-content.active{display:block;}
-  nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#17212B;border-top:1px solid #2B3948;}
-  nav button{flex:1;padding:12px 0;background:none;border:none;color:#8CA0AF;font-size:13px;}
-  nav button.active{color:#F2A93B;font-weight:600;}
-  .placeholder{color:#8CA0AF;font-size:14px;padding:30px 0;text-align:center;}
+  :root{
+    --bg:#0F1620; --surface:#17212B; --surface-2:#1E2A36; --line:#2B3948;
+    --text:#E9EEF2; --muted:#8CA0AF; --navy:#0B1F33; --navy-2:#123456;
+    --gold:#C9A227; --gold-2:#E9C55B; --green:#4FD1A0; --red:#E8543A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    padding-bottom:78px;
+  }
+
+  /* ---------- Professional header ---------- */
+  header.app-header{
+    background:linear-gradient(135deg,var(--navy),var(--navy-2));
+    border-bottom:2px solid var(--gold);
+    padding:14px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:20;
+  }
+  .brand{display:flex; align-items:center; gap:11px;}
+  .logo-mark{
+    width:38px; height:38px; border-radius:9px;
+    background:linear-gradient(160deg,var(--gold-2),var(--gold));
+    color:var(--navy); font-weight:800; font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+    letter-spacing:0.02em; flex:none;
+  }
+  .brand-text .brand-name{font-size:16.5px; font-weight:700; color:#fff; line-height:1.15;}
+  .brand-text .brand-tag{font-size:11.5px; color:#C9D6E3; letter-spacing:0.03em; margin-top:1px;}
+
+  /* ---------- Layout ---------- */
+  main{padding:14px 14px 20px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .section-title{font-size:13px; color:var(--muted); margin:2px 2px 12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;}
+
+  .tool-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .tool-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    text-align:center; cursor:pointer;
+  }
+  .tool-card .ic{font-size:24px;}
+  .tool-card .lb{font-size:12.5px; color:var(--text); line-height:1.3;}
+  .tool-card:active{background:var(--surface-2);}
+
+  .tool-view{display:none;}
+  .tool-topbar{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .back-btn{
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    border-radius:7px; padding:7px 12px; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .tool-topbar h3{font-size:16px; margin:0; font-weight:700;}
+
+  .dropzone{
+    border:1.5px dashed var(--line); border-radius:10px; padding:24px 14px;
+    text-align:center; cursor:pointer; background:var(--surface-2); margin-bottom:12px;
+  }
+  .dropzone.drag{border-color:var(--gold);}
+  .dropzone p{margin:0; color:var(--muted); font-size:13.5px;}
+  .dropzone strong{color:var(--text);}
+
+  .file-list{list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:6px; max-height:160px; overflow:auto;}
+  .file-list li{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:8px 10px; font-size:12.5px;
+  }
+  .file-list .fname{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .file-list .rm{background:none; border:none; color:var(--red); font-size:16px; cursor:pointer;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px; font-weight:600;}
+  .field input[type=text], .field input[type=number], .field select{
+    width:100%; padding:9px 11px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:7px; color:var(--text); font-size:14px;
+  }
+  .field input[type=range]{width:100%; accent-color:var(--gold);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  .btn-primary{
+    background:linear-gradient(135deg,var(--gold-2),var(--gold)); color:var(--navy);
+    border:none; padding:12px 16px; border-radius:8px; font-weight:700; font-size:14.5px; cursor:pointer;
+  }
+  .btn-primary:disabled{opacity:0.4;}
+  .btn-ghost{
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 16px; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;
+  }
+  .full{width:100%;}
+
+  .stat-row{display:flex; gap:10px; margin:12px 0; flex-wrap:wrap;}
+  .stat{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:9px 12px; flex:1; min-width:100px;}
+  .stat .k{font-size:11px; color:var(--muted);}
+  .stat .v{font-size:15.5px; font-weight:700;}
+  .stat .v.good{color:var(--green);}
+
+  canvas.preview{max-width:100%; border-radius:8px; display:block; margin-bottom:10px; background:#000;}
+
+  .note{color:var(--muted); font-size:12px; line-height:1.6; margin-top:12px;}
+
+  /* ---------- Bottom nav ---------- */
+  nav.bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:30;
+    display:flex; background:var(--surface); border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav.bottom-nav button{
+    flex:1; background:none; border:none; padding:10px 0 8px; color:var(--muted);
+    font-size:12px; display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  nav.bottom-nav button .ic{font-size:19px;}
+  nav.bottom-nav button.active{color:var(--gold-2); font-weight:700;}
+
+  .toast{
+    position:fixed; bottom:82px; left:50%; transform:translateX(-50%);
+    background:var(--green); color:#0B1F33; padding:9px 18px; border-radius:20px;
+    font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:50;
+  }
+  .toast.show{opacity:1;}
 </style>
 </head>
 <body>
-<header>OSP PDF Toolkit</header>
+
+<header class="app-header">
+  <div class="brand">
+    <div class="logo-mark">OSP</div>
+    <div class="brand-text">
+      <div class="brand-name">OSP PDF Toolkit</div>
+      <div class="brand-tag">Merge â¢ Resize â¢ Compress</div>
+    </div>
+  </div>
+</header>
 
 <main>
-  <div class="tab-content active" id="tab-pdf">
-    <p class="placeholder">PDF ke tools yahan aayenge (Images se PDF, Merge, Split, waghera)</p>
-  </div>
-  <div class="tab-content" id="tab-resize">
-    <p class="placeholder">Resize ke tools yahan aayenge</p>
-  </div>
-  <div class="tab-content" id="tab-compress">
-    <p class="placeholder">Compress ke tools yahan aayenge</p>
-  </div>
+
+  <!-- ============ PDF TAB ============ -->
+  <section class="panel active" id="panel-pdf">
+    <div class="tool-grid" id="grid-pdf">
+      <div class="tool-card" onclick="showTool('pdf','pdf-img2pdf')"><span class="ic">ð¼ï¸</span><span class="lb">Images se PDF</span></div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-merge')"><span class="ic">ð</span><span class="lb">PDF Merge</span></div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-split')"><span class="ic">âï¸</span><span class="lb">PDF Split</span></div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-reorder')"><span class="ic">ð</span><span class="lb">Reorder/Rotate</span></div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-watermark')"><span class="ic">ð§</span><span class="lb">Watermark</span></div>
+    </div>
+
+    <!-- Images to PDF -->
+    <div class="tool-view" id="pdf-img2pdf">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>Images se PDF</h3></div>
+      <div class="dropzone" id="i2p-drop"><p><strong>Photos daalein</strong> ya tap karein<br>(kai photo ek saath chun sakte hain)</p></div>
+      <input type="file" id="i2p-input" accept="image/*" multiple hidden>
+      <ul class="file-list" id="i2p-list"></ul>
+      <button class="btn-primary full" id="i2p-generate" disabled>PDF Banayein</button>
+      <p class="note">Har photo PDF mein ek alag page banegi, apne aap sahi size mein fit ho jayegi.</p>
+    </div>
+
+    <!-- Merge -->
+    <div class="tool-view" id="pdf-merge">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>PDF Merge</h3></div>
+      <div class="dropzone" id="merge-drop"><p><strong>2 ya zyada PDF daalein</strong> jo jodni hain</p></div>
+      <input type="file" id="merge-input" accept="application/pdf" multiple hidden>
+      <ul class="file-list" id="merge-list"></ul>
+      <p class="note" style="margin-top:-4px;margin-bottom:10px;">Jis order mein upload karenge, usi order mein jud jayengi.</p>
+      <button class="btn-primary full" id="merge-btn" disabled>Merge Karein</button>
+    </div>
+
+    <!-- Split -->
+    <div class="tool-view" id="pdf-split">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>PDF Split</h3></div>
+      <div class="dropzone" id="split-drop"><p><strong>Ek PDF daalein</strong> jise todna hai</p><p id="split-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
+      <input type="file" id="split-input" accept="application/pdf" hidden>
+      <button class="btn-primary full" id="split-btn" disabled>Har Page Alag Karein</button>
+      <p class="note">Har page ek alag PDF ban jayega, sab ek ZIP file mein download hoga.</p>
+    </div>
+
+    <!-- Reorder/Rotate -->
+    <div class="tool-view" id="pdf-reorder">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>Reorder / Rotate</h3></div>
+      <div class="dropzone" id="reorder-drop"><p><strong>Ek PDF daalein</strong></p><p id="reorder-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
+      <input type="file" id="reorder-input" accept="application/pdf" hidden>
+      <div class="field">
+        <label>Naya page order (khaali chhodein agar badalna nahi)</label>
+        <input type="text" id="reorder-order" placeholder="jaise: 3,1,2">
+      </div>
+      <div class="field">
+        <label>Rotate (sab pages)</label>
+        <select id="reorder-angle">
+          <option value="0">Ghumaayein nahi</option>
+          <option value="90">90Â°</option>
+          <option value="180">180Â°</option>
+          <option value="270">270Â°</option>
+        </select>
+      </div>
+      <button class="btn-primary full" id="reorder-btn" disabled>Apply Karein</button>
+    </div>
+
+    <!-- Watermark -->
+    <div class="tool-view" id="pdf-watermark">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>Watermark</h3></div>
+      <div class="dropzone" id="wm-drop"><p><strong>Ek PDF daalein</strong></p><p id="wm-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
+      <input type="file" id="wm-input" accept="application/pdf" hidden>
+      <div class="field">
+        <label>Watermark text</label>
+        <input type="text" id="wm-text" placeholder="jaise: CONFIDENTIAL">
+      </div>
+      <button class="btn-primary full" id="wm-btn" disabled>Watermark Lagayein</button>
+    </div>
+  </section>
+
+  <!-- ============ RESIZE TAB ============ -->
+  <section class="panel" id="panel-resize">
+    <div class="tool-grid" id="grid-resize">
+      <div class="tool-card" onclick="showTool('resize','resize-single')"><span class="ic">ð</span><span class="lb">Image Resize</span></div>
+      <div class="tool-card" onclick="showTool('resize','resize-bulk')"><span class="ic">ðï¸</span><span class="lb">Bulk Resize</span></div>
+    </div>
+
+    <div class="tool-view" id="resize-single">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('resize')">â Wapas</button><h3>Image Resize</h3></div>
+      <div class="dropzone" id="rs-drop"><p><strong>Photo daalein</strong></p></div>
+      <input type="file" id="rs-input" accept="image/*" hidden>
+      <canvas class="preview" id="rs-canvas" style="display:none;"></canvas>
+      <div class="row2">
+        <div class="field"><label>Chaudai (px)</label><input type="number" id="rs-w"></div>
+        <div class="field"><label>Oonchai (px)</label><input type="number" id="rs-h"></div>
+      </div>
+      <div class="field">
+        <label>Ya percentage se: <span id="rs-pct-label">100%</span></label>
+        <input type="range" id="rs-pct" min="10" max="200" value="100">
+      </div>
+      <button class="btn-primary full" id="rs-apply" disabled>Resize Karein</button>
+    </div>
+
+    <div class="tool-view" id="resize-bulk">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('resize')">â Wapas</button><h3>Bulk Resize</h3></div>
+      <div class="dropzone" id="rb-drop"><p><strong>Kai photos daalein</strong></p></div>
+      <input type="file" id="rb-input" accept="image/*" multiple hidden>
+      <ul class="file-list" id="rb-list"></ul>
+      <div class="field">
+        <label>Sab photos ka size: <span id="rb-pct-label">70%</span></label>
+        <input type="range" id="rb-pct" min="10" max="150" value="70">
+      </div>
+      <button class="btn-primary full" id="rb-apply" disabled>Sab Resize Karein (ZIP)</button>
+    </div>
+  </section>
+
+  <!-- ============ COMPRESS TAB ============ -->
+  <section class="panel" id="panel-compress">
+    <div class="tool-grid" id="grid-compress">
+      <div class="tool-card" onclick="showTool('compress','compress-image')"><span class="ic">ð¼ï¸</span><span class="lb">Image Compress</span></div>
+      <div class="tool-card" onclick="showTool('compress','compress-bulk')"><span class="ic">ðï¸</span><span class="lb">Bulk Compress</span></div>
+      <div class="tool-card" onclick="showTool('compress','compress-pdf')"><span class="ic">ð</span><span class="lb">PDF Compress</span></div>
+    </div>
+
+    <div class="tool-view" id="compress-image">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')">â Wapas</button><h3>Image Compress</h3></div>
+      <div class="dropzone" id="ci-drop"><p><strong>Photo daalein</strong></p></div>
+      <input type="file" id="ci-input" accept="image/*" hidden>
+      <canvas class="preview" id="ci-canvas" style="display:none;"></canvas>
+      <div class="field">
+        <label>Quality: <span id="ci-q-label">70%</span></label>
+        <input type="range" id="ci-q" min="10" max="95" value="70">
+      </div>
+      <div class="stat-row" id="ci-stats" style="display:none;">
+        <div class="stat"><div class="k">Original</div><div class="v" id="ci-orig">â</div></div>
+        <div class="stat"><div class="k">Naya</div><div class="v good" id="ci-new">â</div></div>
+        <div class="stat"><div class="k">Bacha</div><div class="v good" id="ci-saved">â</div></div>
+      </div>
+      <button class="btn-primary full" id="ci-apply" disabled>Compress Karein</button>
+    </div>
+
+    <div class="tool-view" id="compress-bulk">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')">â Wapas</button><h3>Bulk Compress</h3></div>
+      <div class="dropzone" id="cb-drop"><p><strong>Kai photos daalein</strong></p></div>
+      <input type="file" id="cb-input" accept="image/*" multiple hidden>
+      <ul class="file-list" id="cb-list"></ul>
+      <div class="field">
+        <label>Quality: <span id="cb-q-label">70%</span></label>
+        <input type="range" id="cb-q" min="10" max="95" value="70">
+      </div>
+      <button class="btn-primary full" id="cb-apply" disabled>Sab Compress Karein (ZIP)</button>
+    </div>
+
+    <div class="tool-view" id="compress-pdf">
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')">â Wapas</button><h3>PDF Compress</h3></div>
+      <div class="dropzone" id="cp-drop"><p><strong>PDF daalein</strong></p><p id="cp-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
+      <input type="file" id="cp-input" accept="application/pdf" hidden>
+      <div class="stat-row" id="cp-stats" style="display:none;">
+        <div class="stat"><div class="k">Original</div><div class="v" id="cp-orig">â</div></div>
+        <div class="stat"><div class="k">Naya</div><div class="v good" id="cp-new">â</div></div>
+        <div class="stat"><div class="k">Bacha</div><div class="v good" id="cp-saved">â</div></div>
+      </div>
+      <button class="btn-primary full" id="cp-apply" disabled>Compress Karein</button>
+      <p class="note">Bahut bhaari scanned-image PDF mein kam farak pad sakta hai.</p>
+    </div>
+  </section>
+
 </main>
 
-<nav>
-  <button class="active" data-tab="pdf">PDF</button>
-  <button data-tab="resize">Resize</button>
-  <button data-tab="compress">Compress</button>
+<nav class="bottom-nav">
+  <button class="navbtn active" data-tab="pdf" onclick="showMainTab('pdf')"><span class="ic">ð</span>PDF</button>
+  <button class="navbtn" data-tab="resize" onclick="showMainTab('resize')"><span class="ic">ð</span>Resize</button>
+  <button class="navbtn" data-tab="compress" onclick="showMainTab('compress')"><span class="ic">ðï¸</span>Compress</button>
 </nav>
 
+<div class="toast" id="toast"></div>
+
 <script>
-document.querySelectorAll('nav button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+/* ============ Navigation ============ */
+function $(id){ return document.getElementById(id); }
+function showMainTab(tab){
+  ['pdf','resize','compress'].forEach(t=>{
+    document.getElementById('panel-'+t).classList.toggle('active', t===tab);
   });
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  showToolGrid(tab);
+}
+function showToolGrid(tab){
+  document.querySelectorAll('#panel-'+tab+' .tool-view').forEach(v=>v.style.display='none');
+  $('grid-'+tab).style.display='grid';
+}
+function showTool(tab, toolId){
+  $('grid-'+tab).style.display='none';
+  document.querySelectorAll('#panel-'+tab+' .tool-view').forEach(v=>v.style.display='none');
+  $(toolId).style.display='block';
+}
+
+/* ============ Utilities ============ */
+function fmtBytes(b){ if(b<1024) return b+' B'; if(b<1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/(1024*1024)).toFixed(2)+' MB'; }
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+function loadImage(src){ return new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src; }); }
+function setupDrop(zoneId, inputId, onFiles){
+  const zone = $(zoneId), input = $(inputId);
+  zone.addEventListener('click', ()=>input.click());
+  input.addEventListener('change', e=>{ if(e.target.files.length) onFiles(e.target.files); input.value=''; });
+  ['dragover','dragenter'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('drag');}));
+  zone.addEventListener('drop', e=>{ if(e.dataTransfer.files.length) onFiles(e.dataTransfer.files); });
+}
+function renderFileList(listId, arr, onChange){
+  const ul = $(listId); ul.innerHTML='';
+  arr.forEach((f,idx)=>{
+    const li = document.createElement('li');
+    const span = document.createElement('span'); span.className='fname'; span.textContent = f.name+' ('+fmtBytes(f.size)+')';
+    const btn = document.createElement('button'); btn.className='rm'; btn.textContent='â';
+    btn.addEventListener('click', ()=>{ arr.splice(idx,1); renderFileList(listId, arr, onChange); });
+    li.appendChild(span); li.appendChild(btn); ul.appendChild(li);
+  });
+  onChange();
+}
+
+/* ============ AdMob (works only inside the built Android app) ============ */
+const ADMOB_APP_ID = 'ca-app-pub-1247625335902562~3475213673';
+const ADMOB_BANNER_ID = 'ca-app-pub-1247625335902562/2647393333';
+const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-1247625335902562/5820351587';
+let interstitialReady = false;
+
+function isNativeApp(){ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+
+async function initAds(){
+  if(!isNativeApp()) return;
+  try{
+    const { AdMob } = window.Capacitor.Plugins;
+    await AdMob.initialize();
+    await AdMob.showBanner({ adId: ADMOB_BANNER_ID, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 60 });
+    await prepareInterstitial();
+  }catch(e){ console.warn('AdMob init failed', e); }
+}
+async function prepareInterstitial(){
+  if(!isNativeApp()) return;
+  try{
+    const { AdMob } = window.Capacitor.Plugins;
+    await AdMob.prepareInterstitial({ adId: ADMOB_INTERSTITIAL_ID });
+    interstitialReady = true;
+  }catch(e){ interstitialReady = false; }
+}
+async function showInterstitialThenPrepareNext(){
+  if(!isNativeApp() || !interstitialReady) return;
+  try{
+    const { AdMob } = window.Capacitor.Plugins;
+    await AdMob.showInterstitial();
+  }catch(e){}
+  interstitialReady = false;
+  prepareInterstitial();
+}
+document.addEventListener('DOMContentLoaded', initAds);
+
+/* ================================================================
+   PDF TAB
+   ================================================================ */
+
+/* -- Images to PDF -- */
+let i2pFiles = [];
+setupDrop('i2p-drop','i2p-input', files=>{
+  Array.from(files).forEach(f=>{ if(f.type.startsWith('image/')) i2pFiles.push(f); });
+  renderFileList('i2p-list', i2pFiles, ()=>{ $('i2p-generate').disabled = i2pFiles.length===0; });
+});
+$('i2p-generate').addEventListener('click', async ()=>{
+  if(i2pFiles.length===0) return;
+  $('i2p-generate').disabled = true; $('i2p-generate').textContent = 'Bana rahe hain...';
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit:'pt' });
+  for(let i=0;i<i2pFiles.length;i++){
+    const url = URL.createObjectURL(i2pFiles[i]);
+    const img = await loadImage(url);
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const scale = Math.min(pageW/img.width, pageH/img.height);
+    const w = img.width*scale, h = img.height*scale;
+    if(i>0) pdf.addPage();
+    pdf.addImage(img, 'JPEG', (pageW-w)/2, (pageH-h)/2, w, h);
+    URL.revokeObjectURL(url);
+  }
+  downloadBlob(pdf.output('blob'), 'osp-images.pdf');
+  toast('PDF taiyar ho gaya!');
+  $('i2p-generate').disabled = false; $('i2p-generate').textContent = 'PDF Banayein';
+  showInterstitialThenPrepareNext();
+});
+
+/* -- Merge -- */
+let mergeFiles = [];
+setupDrop('merge-drop','merge-input', files=>{
+  Array.from(files).forEach(f=>{ if(f.type==='application/pdf') mergeFiles.push(f); });
+  renderFileList('merge-list', mergeFiles, ()=>{ $('merge-btn').disabled = mergeFiles.length<2; });
+});
+$('merge-btn').addEventListener('click', async ()=>{
+  $('merge-btn').disabled = true; $('merge-btn').textContent = 'Jod rahe hain...';
+  const outDoc = await PDFLib.PDFDocument.create();
+  for(const f of mergeFiles){
+    const bytes = await f.arrayBuffer();
+    const src = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+    const pages = await outDoc.copyPages(src, src.getPageIndices());
+    pages.forEach(p=>outDoc.addPage(p));
+  }
+  const outBytes = await outDoc.save();
+  downloadBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-merged.pdf');
+  toast('PDF merge ho gaya!');
+  $('merge-btn').disabled = false; $('merge-btn').textContent = 'Merge Karein';
+  showInterstitialThenPrepareNext();
+});
+
+/* -- Split -- */
+let splitFile = null;
+setupDrop('split-drop','split-input', files=>{
+  splitFile = files[0];
+  $('split-name').textContent = splitFile ? splitFile.name : '';
+  $('split-btn').disabled = !splitFile;
+});
+$('split-btn').addEventListener('click', async ()=>{
+  $('split-btn').disabled = true; $('split-btn').textContent = 'Tod rahe hain...';
+  const bytes = await splitFile.arrayBuffer();
+  const src = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+  const zip = new JSZip();
+  const total = src.getPageCount();
+  for(let i=0;i<total;i++){
+    const outDoc = await PDFLib.PDFDocument.create();
+    const [page] = await outDoc.copyPages(src, [i]);
+    outDoc.addPage(page);
+    const outBytes = await outDoc.save();
+    zip.file('page-'+(i+1)+'.pdf', outBytes);
+  }
+  const zipBlob = await zip.generateAsync({ type:'blob' });
+  downloadBlob(zipBlob, 'osp-split-pages.zip');
+  toast('Split ho gaya!');
+  $('split-btn').disabled = false; $('split-btn').textContent = 'Har Page Alag Karein';
+  showInterstitialThenPrepareNext();
+});
+
+/* -- Reorder / Rotate -- */
+let reorderFile = null;
+setupDrop('reorder-drop','reorder-input', files=>{
+  reorderFile = files[0];
+  $('reorder-name').textContent = reorderFile ? reorderFile.name : '';
+  $('reorder-btn').disabled = !reorderFile;
+});
+$('reorder-btn').addEventListener('click', async ()=>{
+  $('reorder-btn').disabled = true; $('reorder-btn').textContent = 'Kar rahe hain...';
+  const bytes = await reorderFile.arrayBuffer();
+  const src = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+  const total = src.getPageCount();
+  const orderVal = $('reorder-order').value.trim();
+  let indices;
+  if(orderVal){
+    indices = orderVal.split(',').map(n=>parseInt(n.trim())-1).filter(n=>n>=0 && n<total);
+    if(indices.length===0) indices = [...Array(total).keys()];
+  } else {
+    indices = [...Array(total).keys()];
+  }
+  const angle = parseInt($('reorder-angle').value) || 0;
+  const outDoc = await PDFLib.PDFDocument.create();
+  const pages = await outDoc.copyPages(src, indices);
+  pages.forEach(p=>{ if(angle) p.setRotation(PDFLib.degrees(angle)); outDoc.addPage(p); });
+  const outBytes = await outDoc.save();
+  downloadBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-reordered.pdf');
+  toast('Ho gaya!');
+  $('reorder-btn').disabled = false; $('reorder-btn').textContent = 'Apply Karein';
+  showInterstitialThenPrepareNext();
+});
+
+/* -- Watermark -- */
+let wmFile = null;
+setupDrop('wm-drop','wm-input', files=>{
+  wmFile = files[0];
+  $('wm-name').textContent = wmFile ? wmFile.name : '';
+  $('wm-btn').disabled = !wmFile;
+});
+$('wm-btn').addEventListener('click', async ()=>{
+  $('wm-btn').disabled = true; $('wm-btn').textContent = 'Laga rahe hain...';
+  const text = $('wm-text').value.trim() || 'CONFIDENTIAL';
+  const bytes = await wmFile.arrayBuffer();
+  const doc = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+  const font = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  doc.getPages().forEach(page=>{
+    const { width, height } = page.getSize();
+    page.drawText(text, {
+      x: Math.max(20, width/2 - text.length*10), y: height/2, size: 40, font,
+      color: PDFLib.rgb(0.6,0.6,0.6), opacity: 0.3, rotate: PDFLib.degrees(45)
+    });
+  });
+  const outBytes = await doc.save();
+  downloadBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-watermarked.pdf');
+  toast('Watermark lag gaya!');
+  $('wm-btn').disabled = false; $('wm-btn').textContent = 'Watermark Lagayein';
+  showInterstitialThenPrepareNext();
+});
+
+/* ================================================================
+   RESIZE TAB
+   ================================================================ */
+
+/* -- Single resize -- */
+let rsImg=null, rsOrigW=0, rsOrigH=0, rsOutBlob=null;
+setupDrop('rs-drop','rs-input', files=>{
+  const f = files[0]; if(!f || !f.type.startsWith('image/')) return;
+  loadImage(URL.createObjectURL(f)).then(img=>{
+    rsImg = img; rsOrigW = img.width; rsOrigH = img.height;
+    $('rs-w').value = img.width; $('rs-h').value = img.height;
+    const cv = $('rs-canvas'); cv.style.display='block'; cv.width=img.width; cv.height=img.height;
+    cv.getContext('2d').drawImage(img,0,0);
+    $('rs-apply').disabled = false;
+  });
+});
+$('rs-w').addEventListener('input', ()=>{ if(rsImg) $('rs-h').value = Math.round($('rs-w').value*(rsOrigH/rsOrigW)); });
+$('rs-h').addEventListener('input', ()=>{ if(rsImg) $('rs-w').value = Math.round($('rs-h').value*(rsOrigW/rsOrigH)); });
+$('rs-pct').addEventListener('input', ()=>{
+  $('rs-pct-label').textContent = $('rs-pct').value+'%';
+  if(rsImg){ $('rs-w').value = Math.round(rsOrigW*$('rs-pct').value/100); $('rs-h').value = Math.round(rsOrigH*$('rs-pct').value/100); }
+});
+$('rs-apply').addEventListener('click', ()=>{
+  if(!rsImg) return;
+  const w = parseInt($('rs-w').value)||rsOrigW, h = parseInt($('rs-h').value)||rsOrigH;
+  const cv = $('rs-canvas'); cv.width=w; cv.height=h;
+  cv.getContext('2d').drawImage(rsImg,0,0,w,h);
+  cv.toBlob(blob=>{ downloadBlob(blob, 'osp-resized.png'); toast('Resize ho gaya!'); showInterstitialThenPrepareNext(); }, 'image/png');
+});
+
+/* -- Bulk resize -- */
+let rbFiles = [];
+setupDrop('rb-drop','rb-input', files=>{
+  Array.from(files).forEach(f=>{ if(f.type.startsWith('image/')) rbFiles.push(f); });
+  renderFileList('rb-list', rbFiles, ()=>{ $('rb-apply').disabled = rbFiles.length===0; });
+});
+$('rb-pct').addEventListener('input', ()=>{ $('rb-pct-label').textContent = $('rb-pct').value+'%'; });
+$('rb-apply').addEventListener('click', async ()=>{
+  if(rbFiles.length===0) return;
+  $('rb-apply').disabled=true; $('rb-apply').textContent='Resize ho raha hai...';
+  const pct = parseInt($('rb-pct').value)/100;
+  const zip = new JSZip();
+  for(let i=0;i<rbFiles.length;i++){
+    const f = rbFiles[i];
+    const img = await loadImage(URL.createObjectURL(f));
+    const w = Math.round(img.width*pct), h = Math.round(img.height*pct);
+    const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    const blob = await new Promise(res=>cv.toBlob(res,'image/jpeg',0.9));
+    zip.file('resized-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.jpg', blob);
+  }
+  const zipBlob = await zip.generateAsync({type:'blob'});
+  downloadBlob(zipBlob, 'osp-bulk-resized.zip');
+  toast('Sab resize ho gaye!');
+  $('rb-apply').disabled=false; $('rb-apply').textContent='Sab Resize Karein (ZIP)';
+  showInterstitialThenPrepareNext();
+});
+
+/* ================================================================
+   COMPRESS TAB
+   ================================================================ */
+
+/* -- Single image compress -- */
+let ciImg=null, ciFile=null;
+setupDrop('ci-drop','ci-input', files=>{
+  const f = files[0]; if(!f || !f.type.startsWith('image/')) return;
+  ciFile = f;
+  loadImage(URL.createObjectURL(f)).then(img=>{
+    ciImg = img;
+    const cv = $('ci-canvas'); cv.style.display='block'; cv.width=img.width; cv.height=img.height;
+    cv.getContext('2d').drawImage(img,0,0);
+    $('ci-apply').disabled = false;
+    $('ci-stats').style.display='none';
+  });
+});
+$('ci-q').addEventListener('input', ()=>{ $('ci-q-label').textContent = $('ci-q').value+'%'; });
+$('ci-apply').addEventListener('click', ()=>{
+  if(!ciImg) return;
+  const q = parseInt($('ci-q').value)/100;
+  $('ci-canvas').toBlob(blob=>{
+    $('ci-orig').textContent = fmtBytes(ciFile.size);
+    $('ci-new').textContent = fmtBytes(blob.size);
+    $('ci-saved').textContent = Math.max(0, Math.round((1-blob.size/ciFile.size)*100))+'%';
+    $('ci-stats').style.display='flex';
+    downloadBlob(blob, 'osp-compressed.jpg');
+    toast('Compress ho gaya!');
+    showInterstitialThenPrepareNext();
+  }, 'image/jpeg', q);
+});
+
+/* -- Bulk compress -- */
+let cbFiles = [];
+setupDrop('cb-drop','cb-input', files=>{
+  Array.from(files).forEach(f=>{ if(f.type.startsWith('image/')) cbFiles.push(f); });
+  renderFileList('cb-list', cbFiles, ()=>{ $('cb-apply').disabled = cbFiles.length===0; });
+});
+$('cb-q').addEventListener('input', ()=>{ $('cb-q-label').textContent = $('cb-q').value+'%'; });
+$('cb-apply').addEventListener('click', async ()=>{
+  if(cbFiles.length===0) return;
+  $('cb-apply').disabled=true; $('cb-apply').textContent='Compress ho raha hai...';
+  const q = parseInt($('cb-q').value)/100;
+  const zip = new JSZip();
+  for(let i=0;i<cbFiles.length;i++){
+    const f = cbFiles[i];
+    const img = await loadImage(URL.createObjectURL(f));
+    const cv = document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
+    cv.getContext('2d').drawImage(img,0,0);
+    const blob = await new Promise(res=>cv.toBlob(res,'image/jpeg',q));
+    zip.file('compressed-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.jpg', blob);
+  }
+  const zipBlob = await zip.generateAsync({type:'blob'});
+  downloadBlob(zipBlob, 'osp-bulk-compressed.zip');
+  toast('Sab compress ho gaye!');
+  $('cb-apply').disabled=false; $('cb-apply').textContent='Sab Compress Karein (ZIP)';
+  showInterstitialThenPrepareNext();
+});
+
+/* -- PDF compress -- */
+let cpFile = null;
+setupDrop('cp-drop','cp-input', files=>{
+  cpFile = files[0];
+  $('cp-name').textContent = cpFile ? cpFile.name : '';
+  $('cp-apply').disabled = !cpFile;
+  $('cp-stats').style.display='none';
+});
+$('cp-apply').addEventListener('click', async ()=>{
+  if(!cpFile) return;
+  $('cp-apply').disabled=true; $('cp-apply').textContent='Compress ho raha hai...';
+  try{
+    const bytes = await cpFile.arrayBuffer();
+    const doc = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+    const outBytes = await doc.save({ useObjectStreams:true });
+    const blob = new Blob([outBytes], {type:'application/pdf'});
+    $('cp-orig').textContent = fmtBytes(cpFile.size);
+    $('cp-new').textContent = fmtBytes(blob.size);
+    $('cp-saved').textContent = Math.max(0, Math.round((1-blob.size/cpFile.size)*100))+'%';
+    $('cp-stats').style.display='flex';
+    downloadBlob(blob, 'osp-compressed.pdf');
+    toast('PDF compress ho gaya!');
+    showInterstitialThenPrepareNext();
+  }catch(e){
+    alert('Is PDF ko process nahi kiya ja saka. Shayad yeh password-protected hai.');
+  }
+  $('cp-apply').disabled=false; $('cp-apply').textContent='Compress Karein';
 });
 </script>
 </body>
