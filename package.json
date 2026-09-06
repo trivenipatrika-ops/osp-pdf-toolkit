@@ -1,0 +1,15 @@
+{
+  "name": "osp-pdf-toolkit",
+  "version": "1.0.0",
+  "description": "OSP PDF Toolkit - PDF, Resize aur Compress tools",
+  "scripts": {
+    "build": "echo 'no build step needed'"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/android": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
