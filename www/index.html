@@ -467,8 +467,13 @@ async function saveOrShareBlob(blob, filename, isImage){
 }
 
 /* ============ AdMob ============ */
-const ADMOB_BANNER_ID = 'ca-app-pub-1247625335902562/2647393333';
-const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-1247625335902562/5820351587';
+/* IMPORTANT: AD_TEST_MODE=true dikhata hai Google ke SAFE TEST ads - inpar jitni baar chahe click karein, koi risk nahi.
+   Jab APP PLAY STORE PAR FINAL PUBLISH karni ho, sirf tab isse false karein, taaki asli ads aur asli kamai shuru ho.
+   AD_TEST_MODE=true rehte hue asli ads bilkul nahi dikhengi - yeh jaan-boojh kar kiya gaya hai, taaki testing ke doraan
+   galti se apne hi ads par click hone se AdMob account band (ban) na ho jaaye. */
+const AD_TEST_MODE = true;
+const ADMOB_BANNER_ID = AD_TEST_MODE ? 'ca-app-pub-3940256099942544/6300978111' : 'ca-app-pub-1247625335902562/2647393333';
+const ADMOB_INTERSTITIAL_ID = AD_TEST_MODE ? 'ca-app-pub-3940256099942544/1033173712' : 'ca-app-pub-1247625335902562/5820351587';
 let interstitialReady = false;
 async function initAds(){
   if(!isNativeApp()) return;
