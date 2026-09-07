@@ -420,9 +420,9 @@ async function saveOrShareBlob(blob, filename, isImage){
     return;
   }
   try{
-    const { Filesystem, Directory } = window.Capacitor.Plugins;
+    const { Filesystem } = window.Capacitor.Plugins;
     const base64Data = await blobToBase64(blob);
-    const written = await Filesystem.writeFile({ path: filename, data: base64Data, directory: Directory.Cache });
+    const written = await Filesystem.writeFile({ path: filename, data: base64Data, directory: 'CACHE' });
     if(!window.Capacitor.Plugins.Share){
       alert('File taiyar hai (' + filename + ') lekin Share plugin nahi mila. package.json check karein.');
       return;
