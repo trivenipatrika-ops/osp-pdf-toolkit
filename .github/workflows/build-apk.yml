@@ -35,6 +35,15 @@ jobs:
         run: |
           sed -i 's#</application>#    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-1247625335902562~3475213673"/>\n    </application>#' android/app/src/main/AndroidManifest.xml
 
+      - name: Decode app icon and splash screen
+        run: |
+          mkdir -p assets
+          base64 -d icon-base64.txt > assets/icon.png
+          base64 -d splash-base64.txt > assets/splash.png
+
+      - name: Generate launcher icons and splash screen
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#0B1F33' --iconBackgroundColorDark '#0B1F33' --splashBackgroundColor '#0B1F33' --splashBackgroundColorDark '#0B1F33'
+
       - name: Build APK
         run: |
           cd android
