@@ -250,7 +250,7 @@
         <input type="range" id="rs-pct" min="10" max="200" value="100">
       </div>
       <button class="btn-primary full" id="rs-apply" disabled>Resize Karein</button>
-      <p class="note">Resize hone ke baad photo apne aap Gallery mein save ho jayegi.</p>
+      <p class="note">Resize hone ke baad Save/Share dialog khulega, wahan se Gallery ya Files mein save kar sakte hain.</p>
     </div>
 
     <div class="tool-view" id="resize-bulk">
@@ -298,7 +298,7 @@
         <div class="stat"><div class="k">Bacha</div><div class="v good" id="ci-saved">-</div></div>
       </div>
       <button class="btn-primary full" id="ci-apply" disabled>Compress Karein</button>
-      <p class="note">Compress hone ke baad photo apne aap Gallery mein save ho jayegi.</p>
+      <p class="note">Compress hone ke baad Save/Share dialog khulega, wahan se Gallery ya Files mein save kar sakte hain.</p>
     </div>
 
     <div class="tool-view" id="compress-bulk">
@@ -415,23 +415,24 @@ async function saveOrShareBlob(blob, filename, isImage){
     toast('Download ho gaya!');
     return;
   }
+  if(!window.Capacitor.Plugins.Filesystem){
+    alert('Setup adhoora hai: Filesystem plugin nahi mila. package.json ko dobara check karein aur naya build banayein.');
+    return;
+  }
   try{
     const { Filesystem, Directory } = window.Capacitor.Plugins;
     const base64Data = await blobToBase64(blob);
     const written = await Filesystem.writeFile({ path: filename, data: base64Data, directory: Directory.Cache });
-    if(isImage && window.Capacitor.Plugins.Media){
-      const { Media } = window.Capacitor.Plugins;
-      await Media.savePhoto({ path: written.uri, album: 'OSP PDF Toolkit' });
-      toast('Gallery mein save ho gaya!');
-    } else if(window.Capacitor.Plugins.Share){
-      const { Share } = window.Capacitor.Plugins;
-      await Share.share({ title: filename, url: written.uri, dialogTitle: 'Save ya Share karein' });
-    } else {
-      webFallbackDownload(blob, filename);
+    if(!window.Capacitor.Plugins.Share){
+      alert('File taiyar hai (' + filename + ') lekin Share plugin nahi mila. package.json check karein.');
+      return;
     }
+    const { Share } = window.Capacitor.Plugins;
+    await Share.share({ title: filename, url: written.uri, dialogTitle: 'Save ya Share karein' });
+    toast('Save/Share dialog khul gaya!');
   }catch(e){
-    console.warn('Save failed, falling back', e);
-    webFallbackDownload(blob, filename);
+    console.warn('Save failed', e);
+    alert('File save karte waqt dikkat aayi: ' + (e && e.message ? e.message : e));
   }
 }
 
