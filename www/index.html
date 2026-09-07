@@ -249,6 +249,13 @@
         <label>Ya percentage se: <span id="rs-pct-label">100%</span></label>
         <input type="range" id="rs-pct" min="10" max="200" value="100">
       </div>
+      <div class="field">
+        <label>Output format</label>
+        <select id="rs-format">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+        </select>
+      </div>
       <button class="btn-primary full" id="rs-apply" disabled>Resize Karein</button>
       <p class="note">Resize hone ke baad Save/Share dialog khulega, wahan se Gallery ya Files mein save kar sakte hain.</p>
     </div>
@@ -261,6 +268,13 @@
       <div class="field">
         <label>Sab photos ka size: <span id="rb-pct-label">70%</span></label>
         <input type="range" id="rb-pct" min="10" max="150" value="70">
+      </div>
+      <div class="field">
+        <label>Output format</label>
+        <select id="rb-format">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+        </select>
       </div>
       <button class="btn-primary full" id="rb-apply" disabled>Sab Resize Karein (ZIP)</button>
     </div>
@@ -289,6 +303,14 @@
       <input type="file" id="ci-input" accept="image/*" hidden>
       <canvas class="preview" id="ci-canvas" style="display:none;"></canvas>
       <div class="field">
+        <label>Output format</label>
+        <select id="ci-format">
+          <option value="auto">Jaisa daala waisa hi rahe</option>
+          <option value="image/jpeg">JPG mein badlein</option>
+          <option value="image/png">PNG mein badlein</option>
+        </select>
+      </div>
+      <div class="field" id="ci-q-field">
         <label>Quality: <span id="ci-q-label">70%</span></label>
         <input type="range" id="ci-q" min="10" max="95" value="70">
       </div>
@@ -307,6 +329,14 @@
       <input type="file" id="cb-input" accept="image/*" multiple hidden>
       <ul class="file-list" id="cb-list"></ul>
       <div class="field">
+        <label>Output format</label>
+        <select id="cb-format">
+          <option value="auto">Jaisa daala waisa hi rahe</option>
+          <option value="image/jpeg">JPG mein badlein</option>
+          <option value="image/png">PNG mein badlein</option>
+        </select>
+      </div>
+      <div class="field" id="cb-q-field">
         <label>Quality: <span id="cb-q-label">70%</span></label>
         <input type="range" id="cb-q" min="10" max="95" value="70">
       </div>
@@ -618,11 +648,14 @@ $('rs-apply').addEventListener('click', async ()=>{
   const w = parseInt($('rs-w').value)||rsOrigW, h = parseInt($('rs-h').value)||rsOrigH;
   const cv = $('rs-canvas'); cv.width=w; cv.height=h;
   cv.getContext('2d').drawImage(rsImg,0,0,w,h);
+  const format = $('rs-format').value;
+  const ext = format==='image/png' ? 'png' : 'jpg';
+  const quality = format==='image/png' ? undefined : 0.92;
   cv.toBlob(async blob=>{
-    await saveOrShareBlob(blob, 'osp-resized.jpg', true);
+    await saveOrShareBlob(blob, 'osp-resized.'+ext, true);
     $('rs-apply').disabled = false; $('rs-apply').textContent = 'Resize Karein';
     showInterstitialThenPrepareNext();
-  }, 'image/jpeg', 0.92);
+  }, format, quality);
 });
 
 let rbFiles = [];
@@ -635,6 +668,9 @@ $('rb-apply').addEventListener('click', async ()=>{
   if(rbFiles.length===0) return;
   $('rb-apply').disabled=true; $('rb-apply').textContent='Resize ho raha hai...';
   const pct = parseInt($('rb-pct').value)/100;
+  const format = $('rb-format').value;
+  const ext = format==='image/png' ? 'png' : 'jpg';
+  const quality = format==='image/png' ? undefined : 0.9;
   const zip = new JSZip();
   for(let i=0;i<rbFiles.length;i++){
     const f = rbFiles[i];
@@ -642,8 +678,8 @@ $('rb-apply').addEventListener('click', async ()=>{
     const w = Math.round(img.width*pct), h = Math.round(img.height*pct);
     const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
     cv.getContext('2d').drawImage(img,0,0,w,h);
-    const blob = await new Promise(res=>cv.toBlob(res,'image/jpeg',0.9));
-    zip.file('resized-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.jpg', blob);
+    const blob = await new Promise(res=>cv.toBlob(res,format,quality));
+    zip.file('resized-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.'+ext, blob);
   }
   const zipBlob = await zip.generateAsync({type:'blob'});
   await saveOrShareBlob(zipBlob, 'osp-bulk-resized.zip', false);
@@ -665,19 +701,32 @@ setupDrop('ci-drop','ci-input', files=>{
   });
 });
 $('ci-q').addEventListener('input', ()=>{ $('ci-q-label').textContent = $('ci-q').value+'%'; });
+function ciResolveFormat(){
+  const choice = $('ci-format').value;
+  if(choice==='auto'){
+    return (ciFile && ciFile.type==='image/png') ? 'image/png' : 'image/jpeg';
+  }
+  return choice;
+}
+$('ci-format').addEventListener('change', ()=>{
+  $('ci-q-field').style.display = (ciResolveFormat()==='image/png') ? 'none' : 'block';
+});
 $('ci-apply').addEventListener('click', async ()=>{
   if(!ciImg) return;
   $('ci-apply').disabled = true; $('ci-apply').textContent = 'Compress ho raha hai...';
+  const format = ciResolveFormat();
+  const ext = format==='image/png' ? 'png' : 'jpg';
   const q = parseInt($('ci-q').value)/100;
+  const quality = format==='image/png' ? undefined : q;
   $('ci-canvas').toBlob(async blob=>{
     $('ci-orig').textContent = fmtBytes(ciFile.size);
     $('ci-new').textContent = fmtBytes(blob.size);
     $('ci-saved').textContent = Math.max(0, Math.round((1-blob.size/ciFile.size)*100))+'%';
     $('ci-stats').style.display='flex';
-    await saveOrShareBlob(blob, 'osp-compressed.jpg', true);
+    await saveOrShareBlob(blob, 'osp-compressed.'+ext, true);
     $('ci-apply').disabled = false; $('ci-apply').textContent = 'Compress Karein';
     showInterstitialThenPrepareNext();
-  }, 'image/jpeg', q);
+  }, format, quality);
 });
 
 let cbFiles = [];
@@ -686,18 +735,25 @@ setupDrop('cb-drop','cb-input', files=>{
   renderFileList('cb-list', cbFiles, ()=>{ $('cb-apply').disabled = cbFiles.length===0; });
 });
 $('cb-q').addEventListener('input', ()=>{ $('cb-q-label').textContent = $('cb-q').value+'%'; });
+$('cb-format').addEventListener('change', ()=>{
+  $('cb-q-field').style.display = ($('cb-format').value==='image/png') ? 'none' : 'block';
+});
 $('cb-apply').addEventListener('click', async ()=>{
   if(cbFiles.length===0) return;
   $('cb-apply').disabled=true; $('cb-apply').textContent='Compress ho raha hai...';
+  const choice = $('cb-format').value;
   const q = parseInt($('cb-q').value)/100;
   const zip = new JSZip();
   for(let i=0;i<cbFiles.length;i++){
     const f = cbFiles[i];
+    const format = choice==='auto' ? (f.type==='image/png' ? 'image/png' : 'image/jpeg') : choice;
+    const ext = format==='image/png' ? 'png' : 'jpg';
+    const quality = format==='image/png' ? undefined : q;
     const img = await loadImage(URL.createObjectURL(f));
     const cv = document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
     cv.getContext('2d').drawImage(img,0,0);
-    const blob = await new Promise(res=>cv.toBlob(res,'image/jpeg',q));
-    zip.file('compressed-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.jpg', blob);
+    const blob = await new Promise(res=>cv.toBlob(res,format,quality));
+    zip.file('compressed-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.'+ext, blob);
   }
   const zipBlob = await zip.generateAsync({type:'blob'});
   await saveOrShareBlob(zipBlob, 'osp-bulk-compressed.zip', false);
