@@ -21,7 +21,6 @@
     padding-bottom:78px;
   }
 
-  /* ---------- Professional header ---------- */
   header.app-header{
     background:linear-gradient(135deg,var(--navy),var(--navy-2));
     border-bottom:2px solid var(--gold);
@@ -40,12 +39,9 @@
   .brand-text .brand-name{font-size:16.5px; font-weight:700; color:#fff; line-height:1.15;}
   .brand-text .brand-tag{font-size:11.5px; color:#C9D6E3; letter-spacing:0.03em; margin-top:1px;}
 
-  /* ---------- Layout ---------- */
   main{padding:14px 14px 20px;}
   .panel{display:none;}
   .panel.active{display:block;}
-
-  .section-title{font-size:13px; color:var(--muted); margin:2px 2px 12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;}
 
   .tool-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
   .tool-card{
@@ -53,7 +49,7 @@
     padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:8px;
     text-align:center; cursor:pointer;
   }
-  .tool-card .ic{font-size:24px;}
+  .tool-card svg{color:var(--gold-2);}
   .tool-card .lb{font-size:12.5px; color:var(--text); line-height:1.3;}
   .tool-card:active{background:var(--surface-2);}
 
@@ -62,6 +58,7 @@
   .back-btn{
     background:var(--surface-2); border:1px solid var(--line); color:var(--text);
     border-radius:7px; padding:7px 12px; font-size:13px; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; gap:5px;
   }
   .tool-topbar h3{font-size:16px; margin:0; font-weight:700;}
 
@@ -95,10 +92,6 @@
     border:none; padding:12px 16px; border-radius:8px; font-weight:700; font-size:14.5px; cursor:pointer;
   }
   .btn-primary:disabled{opacity:0.4;}
-  .btn-ghost{
-    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
-    padding:11px 16px; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;
-  }
   .full{width:100%;}
 
   .stat-row{display:flex; gap:10px; margin:12px 0; flex-wrap:wrap;}
@@ -111,7 +104,6 @@
 
   .note{color:var(--muted); font-size:12px; line-height:1.6; margin-top:12px;}
 
-  /* ---------- Bottom nav ---------- */
   nav.bottom-nav{
     position:fixed; bottom:0; left:0; right:0; z-index:30;
     display:flex; background:var(--surface); border-top:1px solid var(--line);
@@ -121,13 +113,15 @@
     flex:1; background:none; border:none; padding:10px 0 8px; color:var(--muted);
     font-size:12px; display:flex; flex-direction:column; align-items:center; gap:3px;
   }
-  nav.bottom-nav button .ic{font-size:19px;}
   nav.bottom-nav button.active{color:var(--gold-2); font-weight:700;}
+  nav.bottom-nav button.active svg{color:var(--gold-2);}
+  nav.bottom-nav button svg{color:var(--muted);}
 
   .toast{
     position:fixed; bottom:82px; left:50%; transform:translateX(-50%);
     background:var(--green); color:#0B1F33; padding:9px 18px; border-radius:20px;
     font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:50;
+    text-align:center; max-width:85%;
   }
   .toast.show{opacity:1;}
 </style>
@@ -139,7 +133,7 @@
     <div class="logo-mark">OSP</div>
     <div class="brand-text">
       <div class="brand-name">OSP PDF Toolkit</div>
-      <div class="brand-tag">Merge â¢ Resize â¢ Compress</div>
+      <div class="brand-tag">Merge - Resize - Compress</div>
     </div>
   </div>
 </header>
@@ -149,26 +143,39 @@
   <!-- ============ PDF TAB ============ -->
   <section class="panel active" id="panel-pdf">
     <div class="tool-grid" id="grid-pdf">
-      <div class="tool-card" onclick="showTool('pdf','pdf-img2pdf')"><span class="ic">ð¼ï¸</span><span class="lb">Images se PDF</span></div>
-      <div class="tool-card" onclick="showTool('pdf','pdf-merge')"><span class="ic">ð</span><span class="lb">PDF Merge</span></div>
-      <div class="tool-card" onclick="showTool('pdf','pdf-split')"><span class="ic">âï¸</span><span class="lb">PDF Split</span></div>
-      <div class="tool-card" onclick="showTool('pdf','pdf-reorder')"><span class="ic">ð</span><span class="lb">Reorder/Rotate</span></div>
-      <div class="tool-card" onclick="showTool('pdf','pdf-watermark')"><span class="ic">ð§</span><span class="lb">Watermark</span></div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-img2pdf')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-4 4-3-3-6 6"/></svg>
+        <span class="lb">Images se PDF</span>
+      </div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-merge')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+        <span class="lb">PDF Merge</span>
+      </div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-split')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><path d="M8 7.5L20 19M8 16.5L20 5"/></svg>
+        <span class="lb">PDF Split</span>
+      </div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-reorder')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M4 4v5h5"/><path d="M20 12a8 8 0 10-2.6 5.9"/></svg>
+        <span class="lb">Reorder/Rotate</span>
+      </div>
+      <div class="tool-card" onclick="showTool('pdf','pdf-watermark')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M12 2s6 7 6 12a6 6 0 11-12 0c0-5 6-12 6-12z"/></svg>
+        <span class="lb">Watermark</span>
+      </div>
     </div>
 
-    <!-- Images to PDF -->
     <div class="tool-view" id="pdf-img2pdf">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>Images se PDF</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Images se PDF</h3></div>
       <div class="dropzone" id="i2p-drop"><p><strong>Photos daalein</strong> ya tap karein<br>(kai photo ek saath chun sakte hain)</p></div>
       <input type="file" id="i2p-input" accept="image/*" multiple hidden>
       <ul class="file-list" id="i2p-list"></ul>
       <button class="btn-primary full" id="i2p-generate" disabled>PDF Banayein</button>
-      <p class="note">Har photo PDF mein ek alag page banegi, apne aap sahi size mein fit ho jayegi.</p>
+      <p class="note">Har photo PDF mein ek alag page banegi, apne aap sahi size mein fit ho jayegi. PDF banne ke baad Save/Share ka option khulega.</p>
     </div>
 
-    <!-- Merge -->
     <div class="tool-view" id="pdf-merge">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>PDF Merge</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>PDF Merge</h3></div>
       <div class="dropzone" id="merge-drop"><p><strong>2 ya zyada PDF daalein</strong> jo jodni hain</p></div>
       <input type="file" id="merge-input" accept="application/pdf" multiple hidden>
       <ul class="file-list" id="merge-list"></ul>
@@ -176,18 +183,16 @@
       <button class="btn-primary full" id="merge-btn" disabled>Merge Karein</button>
     </div>
 
-    <!-- Split -->
     <div class="tool-view" id="pdf-split">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>PDF Split</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>PDF Split</h3></div>
       <div class="dropzone" id="split-drop"><p><strong>Ek PDF daalein</strong> jise todna hai</p><p id="split-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
       <input type="file" id="split-input" accept="application/pdf" hidden>
       <button class="btn-primary full" id="split-btn" disabled>Har Page Alag Karein</button>
-      <p class="note">Har page ek alag PDF ban jayega, sab ek ZIP file mein download hoga.</p>
+      <p class="note">Har page ek alag PDF ban jayega, sab ek ZIP file mein milega.</p>
     </div>
 
-    <!-- Reorder/Rotate -->
     <div class="tool-view" id="pdf-reorder">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>Reorder / Rotate</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Reorder / Rotate</h3></div>
       <div class="dropzone" id="reorder-drop"><p><strong>Ek PDF daalein</strong></p><p id="reorder-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
       <input type="file" id="reorder-input" accept="application/pdf" hidden>
       <div class="field">
@@ -198,17 +203,16 @@
         <label>Rotate (sab pages)</label>
         <select id="reorder-angle">
           <option value="0">Ghumaayein nahi</option>
-          <option value="90">90Â°</option>
-          <option value="180">180Â°</option>
-          <option value="270">270Â°</option>
+          <option value="90">90 Degree</option>
+          <option value="180">180 Degree</option>
+          <option value="270">270 Degree</option>
         </select>
       </div>
       <button class="btn-primary full" id="reorder-btn" disabled>Apply Karein</button>
     </div>
 
-    <!-- Watermark -->
     <div class="tool-view" id="pdf-watermark">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')">â Wapas</button><h3>Watermark</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('pdf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Watermark</h3></div>
       <div class="dropzone" id="wm-drop"><p><strong>Ek PDF daalein</strong></p><p id="wm-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
       <input type="file" id="wm-input" accept="application/pdf" hidden>
       <div class="field">
@@ -222,12 +226,18 @@
   <!-- ============ RESIZE TAB ============ -->
   <section class="panel" id="panel-resize">
     <div class="tool-grid" id="grid-resize">
-      <div class="tool-card" onclick="showTool('resize','resize-single')"><span class="ic">ð</span><span class="lb">Image Resize</span></div>
-      <div class="tool-card" onclick="showTool('resize','resize-bulk')"><span class="ic">ðï¸</span><span class="lb">Bulk Resize</span></div>
+      <div class="tool-card" onclick="showTool('resize','resize-single')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+        <span class="lb">Image Resize</span>
+      </div>
+      <div class="tool-card" onclick="showTool('resize','resize-bulk')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 012-2h10"/></svg>
+        <span class="lb">Bulk Resize</span>
+      </div>
     </div>
 
     <div class="tool-view" id="resize-single">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('resize')">â Wapas</button><h3>Image Resize</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('resize')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Image Resize</h3></div>
       <div class="dropzone" id="rs-drop"><p><strong>Photo daalein</strong></p></div>
       <input type="file" id="rs-input" accept="image/*" hidden>
       <canvas class="preview" id="rs-canvas" style="display:none;"></canvas>
@@ -240,10 +250,11 @@
         <input type="range" id="rs-pct" min="10" max="200" value="100">
       </div>
       <button class="btn-primary full" id="rs-apply" disabled>Resize Karein</button>
+      <p class="note">Resize hone ke baad photo apne aap Gallery mein save ho jayegi.</p>
     </div>
 
     <div class="tool-view" id="resize-bulk">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('resize')">â Wapas</button><h3>Bulk Resize</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('resize')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Bulk Resize</h3></div>
       <div class="dropzone" id="rb-drop"><p><strong>Kai photos daalein</strong></p></div>
       <input type="file" id="rb-input" accept="image/*" multiple hidden>
       <ul class="file-list" id="rb-list"></ul>
@@ -258,13 +269,22 @@
   <!-- ============ COMPRESS TAB ============ -->
   <section class="panel" id="panel-compress">
     <div class="tool-grid" id="grid-compress">
-      <div class="tool-card" onclick="showTool('compress','compress-image')"><span class="ic">ð¼ï¸</span><span class="lb">Image Compress</span></div>
-      <div class="tool-card" onclick="showTool('compress','compress-bulk')"><span class="ic">ðï¸</span><span class="lb">Bulk Compress</span></div>
-      <div class="tool-card" onclick="showTool('compress','compress-pdf')"><span class="ic">ð</span><span class="lb">PDF Compress</span></div>
+      <div class="tool-card" onclick="showTool('compress','compress-image')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-4 4-3-3-6 6"/></svg>
+        <span class="lb">Image Compress</span>
+      </div>
+      <div class="tool-card" onclick="showTool('compress','compress-bulk')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 012-2h10"/></svg>
+        <span class="lb">Bulk Compress</span>
+      </div>
+      <div class="tool-card" onclick="showTool('compress','compress-pdf')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span class="lb">PDF Compress</span>
+      </div>
     </div>
 
     <div class="tool-view" id="compress-image">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')">â Wapas</button><h3>Image Compress</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Image Compress</h3></div>
       <div class="dropzone" id="ci-drop"><p><strong>Photo daalein</strong></p></div>
       <input type="file" id="ci-input" accept="image/*" hidden>
       <canvas class="preview" id="ci-canvas" style="display:none;"></canvas>
@@ -273,15 +293,16 @@
         <input type="range" id="ci-q" min="10" max="95" value="70">
       </div>
       <div class="stat-row" id="ci-stats" style="display:none;">
-        <div class="stat"><div class="k">Original</div><div class="v" id="ci-orig">â</div></div>
-        <div class="stat"><div class="k">Naya</div><div class="v good" id="ci-new">â</div></div>
-        <div class="stat"><div class="k">Bacha</div><div class="v good" id="ci-saved">â</div></div>
+        <div class="stat"><div class="k">Original</div><div class="v" id="ci-orig">-</div></div>
+        <div class="stat"><div class="k">Naya</div><div class="v good" id="ci-new">-</div></div>
+        <div class="stat"><div class="k">Bacha</div><div class="v good" id="ci-saved">-</div></div>
       </div>
       <button class="btn-primary full" id="ci-apply" disabled>Compress Karein</button>
+      <p class="note">Compress hone ke baad photo apne aap Gallery mein save ho jayegi.</p>
     </div>
 
     <div class="tool-view" id="compress-bulk">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')">â Wapas</button><h3>Bulk Compress</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>Bulk Compress</h3></div>
       <div class="dropzone" id="cb-drop"><p><strong>Kai photos daalein</strong></p></div>
       <input type="file" id="cb-input" accept="image/*" multiple hidden>
       <ul class="file-list" id="cb-list"></ul>
@@ -293,13 +314,13 @@
     </div>
 
     <div class="tool-view" id="compress-pdf">
-      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')">â Wapas</button><h3>PDF Compress</h3></div>
+      <div class="tool-topbar"><button class="back-btn" onclick="showToolGrid('compress')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M15 18l-6-6 6-6"/></svg>Wapas</button><h3>PDF Compress</h3></div>
       <div class="dropzone" id="cp-drop"><p><strong>PDF daalein</strong></p><p id="cp-name" style="margin-top:6px;color:var(--gold-2);"></p></div>
       <input type="file" id="cp-input" accept="application/pdf" hidden>
       <div class="stat-row" id="cp-stats" style="display:none;">
-        <div class="stat"><div class="k">Original</div><div class="v" id="cp-orig">â</div></div>
-        <div class="stat"><div class="k">Naya</div><div class="v good" id="cp-new">â</div></div>
-        <div class="stat"><div class="k">Bacha</div><div class="v good" id="cp-saved">â</div></div>
+        <div class="stat"><div class="k">Original</div><div class="v" id="cp-orig">-</div></div>
+        <div class="stat"><div class="k">Naya</div><div class="v good" id="cp-new">-</div></div>
+        <div class="stat"><div class="k">Bacha</div><div class="v good" id="cp-saved">-</div></div>
       </div>
       <button class="btn-primary full" id="cp-apply" disabled>Compress Karein</button>
       <p class="note">Bahut bhaari scanned-image PDF mein kam farak pad sakta hai.</p>
@@ -309,9 +330,18 @@
 </main>
 
 <nav class="bottom-nav">
-  <button class="navbtn active" data-tab="pdf" onclick="showMainTab('pdf')"><span class="ic">ð</span>PDF</button>
-  <button class="navbtn" data-tab="resize" onclick="showMainTab('resize')"><span class="ic">ð</span>Resize</button>
-  <button class="navbtn" data-tab="compress" onclick="showMainTab('compress')"><span class="ic">ðï¸</span>Compress</button>
+  <button class="navbtn active" data-tab="pdf" onclick="showMainTab('pdf')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+    PDF
+  </button>
+  <button class="navbtn" data-tab="resize" onclick="showMainTab('resize')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+    Resize
+  </button>
+  <button class="navbtn" data-tab="compress" onclick="showMainTab('compress')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 012-2h10"/></svg>
+    Compress
+  </button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -338,14 +368,9 @@ function showTool(tab, toolId){
 
 /* ============ Utilities ============ */
 function fmtBytes(b){ if(b<1024) return b+' B'; if(b<1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/(1024*1024)).toFixed(2)+' MB'; }
-function downloadBlob(blob, filename){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 4000);
-}
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 1800);
+  setTimeout(()=>t.classList.remove('show'), 2200);
 }
 function loadImage(src){ return new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src; }); }
 function setupDrop(zoneId, inputId, onFiles){
@@ -361,21 +386,59 @@ function renderFileList(listId, arr, onChange){
   arr.forEach((f,idx)=>{
     const li = document.createElement('li');
     const span = document.createElement('span'); span.className='fname'; span.textContent = f.name+' ('+fmtBytes(f.size)+')';
-    const btn = document.createElement('button'); btn.className='rm'; btn.textContent='â';
+    const btn = document.createElement('button'); btn.className='rm'; btn.textContent='X';
     btn.addEventListener('click', ()=>{ arr.splice(idx,1); renderFileList(listId, arr, onChange); });
     li.appendChild(span); li.appendChild(btn); ul.appendChild(li);
   });
   onChange();
 }
 
-/* ============ AdMob (works only inside the built Android app) ============ */
-const ADMOB_APP_ID = 'ca-app-pub-1247625335902562~3475213673';
+/* ============ Save / Share (native-first, browser fallback) ============ */
+function isNativeApp(){ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+
+function webFallbackDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onloadend = ()=>{ resolve(reader.result.split(',')[1]); };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+async function saveOrShareBlob(blob, filename, isImage){
+  if(!isNativeApp()){
+    webFallbackDownload(blob, filename);
+    toast('Download ho gaya!');
+    return;
+  }
+  try{
+    const { Filesystem, Directory } = window.Capacitor.Plugins;
+    const base64Data = await blobToBase64(blob);
+    const written = await Filesystem.writeFile({ path: filename, data: base64Data, directory: Directory.Cache });
+    if(isImage && window.Capacitor.Plugins.Media){
+      const { Media } = window.Capacitor.Plugins;
+      await Media.savePhoto({ path: written.uri, album: 'OSP PDF Toolkit' });
+      toast('Gallery mein save ho gaya!');
+    } else if(window.Capacitor.Plugins.Share){
+      const { Share } = window.Capacitor.Plugins;
+      await Share.share({ title: filename, url: written.uri, dialogTitle: 'Save ya Share karein' });
+    } else {
+      webFallbackDownload(blob, filename);
+    }
+  }catch(e){
+    console.warn('Save failed, falling back', e);
+    webFallbackDownload(blob, filename);
+  }
+}
+
+/* ============ AdMob ============ */
 const ADMOB_BANNER_ID = 'ca-app-pub-1247625335902562/2647393333';
 const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-1247625335902562/5820351587';
 let interstitialReady = false;
-
-function isNativeApp(){ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
-
 async function initAds(){
   if(!isNativeApp()) return;
   try{
@@ -404,11 +467,7 @@ async function showInterstitialThenPrepareNext(){
 }
 document.addEventListener('DOMContentLoaded', initAds);
 
-/* ================================================================
-   PDF TAB
-   ================================================================ */
-
-/* -- Images to PDF -- */
+/* ================= PDF TAB ================= */
 let i2pFiles = [];
 setupDrop('i2p-drop','i2p-input', files=>{
   Array.from(files).forEach(f=>{ if(f.type.startsWith('image/')) i2pFiles.push(f); });
@@ -430,13 +489,11 @@ $('i2p-generate').addEventListener('click', async ()=>{
     pdf.addImage(img, 'JPEG', (pageW-w)/2, (pageH-h)/2, w, h);
     URL.revokeObjectURL(url);
   }
-  downloadBlob(pdf.output('blob'), 'osp-images.pdf');
-  toast('PDF taiyar ho gaya!');
+  await saveOrShareBlob(pdf.output('blob'), 'osp-images.pdf', false);
   $('i2p-generate').disabled = false; $('i2p-generate').textContent = 'PDF Banayein';
   showInterstitialThenPrepareNext();
 });
 
-/* -- Merge -- */
 let mergeFiles = [];
 setupDrop('merge-drop','merge-input', files=>{
   Array.from(files).forEach(f=>{ if(f.type==='application/pdf') mergeFiles.push(f); });
@@ -452,13 +509,11 @@ $('merge-btn').addEventListener('click', async ()=>{
     pages.forEach(p=>outDoc.addPage(p));
   }
   const outBytes = await outDoc.save();
-  downloadBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-merged.pdf');
-  toast('PDF merge ho gaya!');
+  await saveOrShareBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-merged.pdf', false);
   $('merge-btn').disabled = false; $('merge-btn').textContent = 'Merge Karein';
   showInterstitialThenPrepareNext();
 });
 
-/* -- Split -- */
 let splitFile = null;
 setupDrop('split-drop','split-input', files=>{
   splitFile = files[0];
@@ -479,13 +534,11 @@ $('split-btn').addEventListener('click', async ()=>{
     zip.file('page-'+(i+1)+'.pdf', outBytes);
   }
   const zipBlob = await zip.generateAsync({ type:'blob' });
-  downloadBlob(zipBlob, 'osp-split-pages.zip');
-  toast('Split ho gaya!');
+  await saveOrShareBlob(zipBlob, 'osp-split-pages.zip', false);
   $('split-btn').disabled = false; $('split-btn').textContent = 'Har Page Alag Karein';
   showInterstitialThenPrepareNext();
 });
 
-/* -- Reorder / Rotate -- */
 let reorderFile = null;
 setupDrop('reorder-drop','reorder-input', files=>{
   reorderFile = files[0];
@@ -510,13 +563,11 @@ $('reorder-btn').addEventListener('click', async ()=>{
   const pages = await outDoc.copyPages(src, indices);
   pages.forEach(p=>{ if(angle) p.setRotation(PDFLib.degrees(angle)); outDoc.addPage(p); });
   const outBytes = await outDoc.save();
-  downloadBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-reordered.pdf');
-  toast('Ho gaya!');
+  await saveOrShareBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-reordered.pdf', false);
   $('reorder-btn').disabled = false; $('reorder-btn').textContent = 'Apply Karein';
   showInterstitialThenPrepareNext();
 });
 
-/* -- Watermark -- */
 let wmFile = null;
 setupDrop('wm-drop','wm-input', files=>{
   wmFile = files[0];
@@ -537,18 +588,13 @@ $('wm-btn').addEventListener('click', async ()=>{
     });
   });
   const outBytes = await doc.save();
-  downloadBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-watermarked.pdf');
-  toast('Watermark lag gaya!');
+  await saveOrShareBlob(new Blob([outBytes],{type:'application/pdf'}), 'osp-watermarked.pdf', false);
   $('wm-btn').disabled = false; $('wm-btn').textContent = 'Watermark Lagayein';
   showInterstitialThenPrepareNext();
 });
 
-/* ================================================================
-   RESIZE TAB
-   ================================================================ */
-
-/* -- Single resize -- */
-let rsImg=null, rsOrigW=0, rsOrigH=0, rsOutBlob=null;
+/* ================= RESIZE TAB ================= */
+let rsImg=null, rsOrigW=0, rsOrigH=0;
 setupDrop('rs-drop','rs-input', files=>{
   const f = files[0]; if(!f || !f.type.startsWith('image/')) return;
   loadImage(URL.createObjectURL(f)).then(img=>{
@@ -565,15 +611,19 @@ $('rs-pct').addEventListener('input', ()=>{
   $('rs-pct-label').textContent = $('rs-pct').value+'%';
   if(rsImg){ $('rs-w').value = Math.round(rsOrigW*$('rs-pct').value/100); $('rs-h').value = Math.round(rsOrigH*$('rs-pct').value/100); }
 });
-$('rs-apply').addEventListener('click', ()=>{
+$('rs-apply').addEventListener('click', async ()=>{
   if(!rsImg) return;
+  $('rs-apply').disabled = true; $('rs-apply').textContent = 'Resize ho raha hai...';
   const w = parseInt($('rs-w').value)||rsOrigW, h = parseInt($('rs-h').value)||rsOrigH;
   const cv = $('rs-canvas'); cv.width=w; cv.height=h;
   cv.getContext('2d').drawImage(rsImg,0,0,w,h);
-  cv.toBlob(blob=>{ downloadBlob(blob, 'osp-resized.png'); toast('Resize ho gaya!'); showInterstitialThenPrepareNext(); }, 'image/png');
+  cv.toBlob(async blob=>{
+    await saveOrShareBlob(blob, 'osp-resized.jpg', true);
+    $('rs-apply').disabled = false; $('rs-apply').textContent = 'Resize Karein';
+    showInterstitialThenPrepareNext();
+  }, 'image/jpeg', 0.92);
 });
 
-/* -- Bulk resize -- */
 let rbFiles = [];
 setupDrop('rb-drop','rb-input', files=>{
   Array.from(files).forEach(f=>{ if(f.type.startsWith('image/')) rbFiles.push(f); });
@@ -595,17 +645,12 @@ $('rb-apply').addEventListener('click', async ()=>{
     zip.file('resized-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.jpg', blob);
   }
   const zipBlob = await zip.generateAsync({type:'blob'});
-  downloadBlob(zipBlob, 'osp-bulk-resized.zip');
-  toast('Sab resize ho gaye!');
+  await saveOrShareBlob(zipBlob, 'osp-bulk-resized.zip', false);
   $('rb-apply').disabled=false; $('rb-apply').textContent='Sab Resize Karein (ZIP)';
   showInterstitialThenPrepareNext();
 });
 
-/* ================================================================
-   COMPRESS TAB
-   ================================================================ */
-
-/* -- Single image compress -- */
+/* ================= COMPRESS TAB ================= */
 let ciImg=null, ciFile=null;
 setupDrop('ci-drop','ci-input', files=>{
   const f = files[0]; if(!f || !f.type.startsWith('image/')) return;
@@ -619,21 +664,21 @@ setupDrop('ci-drop','ci-input', files=>{
   });
 });
 $('ci-q').addEventListener('input', ()=>{ $('ci-q-label').textContent = $('ci-q').value+'%'; });
-$('ci-apply').addEventListener('click', ()=>{
+$('ci-apply').addEventListener('click', async ()=>{
   if(!ciImg) return;
+  $('ci-apply').disabled = true; $('ci-apply').textContent = 'Compress ho raha hai...';
   const q = parseInt($('ci-q').value)/100;
-  $('ci-canvas').toBlob(blob=>{
+  $('ci-canvas').toBlob(async blob=>{
     $('ci-orig').textContent = fmtBytes(ciFile.size);
     $('ci-new').textContent = fmtBytes(blob.size);
     $('ci-saved').textContent = Math.max(0, Math.round((1-blob.size/ciFile.size)*100))+'%';
     $('ci-stats').style.display='flex';
-    downloadBlob(blob, 'osp-compressed.jpg');
-    toast('Compress ho gaya!');
+    await saveOrShareBlob(blob, 'osp-compressed.jpg', true);
+    $('ci-apply').disabled = false; $('ci-apply').textContent = 'Compress Karein';
     showInterstitialThenPrepareNext();
   }, 'image/jpeg', q);
 });
 
-/* -- Bulk compress -- */
 let cbFiles = [];
 setupDrop('cb-drop','cb-input', files=>{
   Array.from(files).forEach(f=>{ if(f.type.startsWith('image/')) cbFiles.push(f); });
@@ -654,13 +699,11 @@ $('cb-apply').addEventListener('click', async ()=>{
     zip.file('compressed-'+(i+1)+'-'+f.name.replace(/\.[^.]+$/,'')+'.jpg', blob);
   }
   const zipBlob = await zip.generateAsync({type:'blob'});
-  downloadBlob(zipBlob, 'osp-bulk-compressed.zip');
-  toast('Sab compress ho gaye!');
+  await saveOrShareBlob(zipBlob, 'osp-bulk-compressed.zip', false);
   $('cb-apply').disabled=false; $('cb-apply').textContent='Sab Compress Karein (ZIP)';
   showInterstitialThenPrepareNext();
 });
 
-/* -- PDF compress -- */
 let cpFile = null;
 setupDrop('cp-drop','cp-input', files=>{
   cpFile = files[0];
@@ -680,9 +723,7 @@ $('cp-apply').addEventListener('click', async ()=>{
     $('cp-new').textContent = fmtBytes(blob.size);
     $('cp-saved').textContent = Math.max(0, Math.round((1-blob.size/cpFile.size)*100))+'%';
     $('cp-stats').style.display='flex';
-    downloadBlob(blob, 'osp-compressed.pdf');
-    toast('PDF compress ho gaya!');
-    showInterstitialThenPrepareNext();
+    await saveOrShareBlob(blob, 'osp-compressed.pdf', false);
   }catch(e){
     alert('Is PDF ko process nahi kiya ja saka. Shayad yeh password-protected hai.');
   }
