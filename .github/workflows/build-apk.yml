@@ -44,14 +44,53 @@ jobs:
       - name: Generate launcher icons and splash screen
         run: npx capacitor-assets generate --android --iconBackgroundColor '#0B1F33' --iconBackgroundColorDark '#0B1F33' --splashBackgroundColor '#0B1F33' --splashBackgroundColorDark '#0B1F33'
 
-      - name: Build APK
+      - name: Build debug APK (quick test)
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: osp-pdf-toolkit-apk
+          name: osp-pdf-toolkit-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Decode signing keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/osp-release-key.jks
+
+      - name: Add signing config to build.gradle
+        run: |
+          cat >> android/app/build.gradle << 'GRADLE_EOF'
+
+          android.signingConfigs {
+              release {
+                  storeFile file('osp-release-key.jks')
+                  storePassword System.getenv("KEYSTORE_PASSWORD")
+                  keyAlias System.getenv("KEY_ALIAS")
+                  keyPassword System.getenv("KEY_PASSWORD")
+              }
+          }
+          android.buildTypes.release.signingConfig = android.signingConfigs.release
+          GRADLE_EOF
+
+      - name: Build SIGNED release AAB and APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd android
+          ./gradlew bundleRelease assembleRelease
+
+      - name: Upload signed release AAB (for Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: osp-pdf-toolkit-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload signed release APK (for direct install/testing)
+        uses: actions/upload-artifact@v4
+        with:
+          name: osp-pdf-toolkit-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
