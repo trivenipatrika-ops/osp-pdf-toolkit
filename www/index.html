@@ -241,14 +241,19 @@
       <div class="dropzone" id="rs-drop"><p><strong>Photo daalein</strong></p></div>
       <input type="file" id="rs-input" accept="image/*" hidden>
       <canvas class="preview" id="rs-canvas" style="display:none;"></canvas>
+      <div class="field" style="display:flex;align-items:center;gap:9px;">
+        <input type="checkbox" id="rs-lock" checked style="width:17px;height:17px;accent-color:var(--gold);">
+        <label for="rs-lock" style="margin:0;color:var(--text);font-weight:500;">Automatic (chaudai-oonchai ka anupaat khud sambhaale)</label>
+      </div>
       <div class="row2">
         <div class="field"><label>Chaudai (px)</label><input type="number" id="rs-w"></div>
         <div class="field"><label>Oonchai (px)</label><input type="number" id="rs-h"></div>
       </div>
-      <div class="field">
+      <div class="field" id="rs-pct-field">
         <label>Ya percentage se: <span id="rs-pct-label">100%</span></label>
         <input type="range" id="rs-pct" min="10" max="200" value="100">
       </div>
+      <p class="note" id="rs-mode-note" style="margin-top:-6px;">Automatic mode mein anupaat (aspect ratio) bana rehta hai - photo khinchi-tani nahi dikhegi. Customize mode mein aap chaudai aur oonchai bilkul apni marzi se rakh sakte hain (jaise seedha 512 x 512), bhale hi original anupaat kuch aur ho.</p>
       <div class="field">
         <label>Output format</label>
         <select id="rs-format">
@@ -641,11 +646,16 @@ setupDrop('rs-drop','rs-input', files=>{
     $('rs-apply').disabled = false;
   });
 });
-$('rs-w').addEventListener('input', ()=>{ if(rsImg) $('rs-h').value = Math.round($('rs-w').value*(rsOrigH/rsOrigW)); });
-$('rs-h').addEventListener('input', ()=>{ if(rsImg) $('rs-w').value = Math.round($('rs-h').value*(rsOrigW/rsOrigH)); });
+$('rs-w').addEventListener('input', ()=>{ if(rsImg && $('rs-lock').checked) $('rs-h').value = Math.round($('rs-w').value*(rsOrigH/rsOrigW)); });
+$('rs-h').addEventListener('input', ()=>{ if(rsImg && $('rs-lock').checked) $('rs-w').value = Math.round($('rs-h').value*(rsOrigW/rsOrigH)); });
 $('rs-pct').addEventListener('input', ()=>{
   $('rs-pct-label').textContent = $('rs-pct').value+'%';
   if(rsImg){ $('rs-w').value = Math.round(rsOrigW*$('rs-pct').value/100); $('rs-h').value = Math.round(rsOrigH*$('rs-pct').value/100); }
+});
+$('rs-lock').addEventListener('change', ()=>{
+  const locked = $('rs-lock').checked;
+  $('rs-pct-field').style.display = locked ? 'block' : 'none';
+  if(locked && rsImg){ $('rs-h').value = Math.round($('rs-w').value*(rsOrigH/rsOrigW)); }
 });
 $('rs-apply').addEventListener('click', async ()=>{
   if(!rsImg) return;
