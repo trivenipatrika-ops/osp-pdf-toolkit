@@ -241,6 +241,16 @@
       <div class="dropzone" id="rs-drop"><p><strong>Photo daalein</strong></p></div>
       <input type="file" id="rs-input" accept="image/*" hidden>
       <canvas class="preview" id="rs-canvas" style="display:none;"></canvas>
+      <div class="field">
+        <label>Exam Preset (chahein to)</label>
+        <select id="rs-exam-preset">
+          <option value="">Koi preset nahi (manual)</option>
+          <option value="200x230">SSC / Railway / Banking - Photo (~200x230 px)</option>
+          <option value="140x60">SSC / Railway / Banking - Signature (~140x60 px)</option>
+          <option value="400x150">UPSC - Signature (~350-500 px, yahan 400x150)</option>
+        </select>
+      </div>
+      <p class="note" id="rs-exam-note" style="display:none;margin-top:-8px;margin-bottom:14px;">Yeh aam taur par maangi jaane wali size hai. Form bharne se pehle apni exam ki 2026 ki official notification se size zaroor confirm kar lein, kyunki har saal thodi badal sakti hai.</p>
       <div class="field" style="display:flex;align-items:center;gap:9px;">
         <input type="checkbox" id="rs-lock" checked style="width:17px;height:17px;accent-color:var(--gold);">
         <label for="rs-lock" style="margin:0;color:var(--text);font-weight:500;">Automatic (chaudai-oonchai ka anupaat khud sambhaale)</label>
@@ -307,6 +317,17 @@
       <div class="dropzone" id="ci-drop"><p><strong>Photo daalein</strong></p></div>
       <input type="file" id="ci-input" accept="image/*" hidden>
       <canvas class="preview" id="ci-canvas" style="display:none;"></canvas>
+      <div class="field">
+        <label>Exam Preset (chahein to)</label>
+        <select id="ci-exam-preset">
+          <option value="">Koi preset nahi (manual quality)</option>
+          <option value="20-50">SSC / Railway / Banking - Photo (20-50 KB)</option>
+          <option value="10-20">SSC / Railway / Banking - Signature (10-20 KB)</option>
+          <option value="20-200">UPSC - Photo (20-200 KB)</option>
+          <option value="20-100">UPSC - Signature (20-100 KB)</option>
+        </select>
+      </div>
+      <p class="note" id="ci-exam-note" style="display:none;margin-top:-8px;margin-bottom:14px;">Yeh aam taur par maangi jaane wali size hai. Form bharne se pehle apni exam ki 2026 ki official notification se size zaroor confirm kar lein, kyunki har saal thodi badal sakti hai. Sahi pixel dimension ke liye pehle Resize tab mein jaakar preset se size set kar lein, phir yahan compress karein.</p>
       <div class="field">
         <label>Output format</label>
         <select id="ci-format">
@@ -657,6 +678,17 @@ $('rs-lock').addEventListener('change', ()=>{
   $('rs-pct-field').style.display = locked ? 'block' : 'none';
   if(locked && rsImg){ $('rs-h').value = Math.round($('rs-w').value*(rsOrigH/rsOrigW)); }
 });
+$('rs-exam-preset').addEventListener('change', ()=>{
+  const val = $('rs-exam-preset').value;
+  $('rs-exam-note').style.display = val ? 'block' : 'none';
+  if(!val) return;
+  const [w, h] = val.split('x').map(Number);
+  $('rs-w').value = w;
+  $('rs-h').value = h;
+  $('rs-lock').checked = false;
+  $('rs-pct-field').style.display = 'none';
+  $('rs-format').value = 'image/jpeg';
+});
 $('rs-apply').addEventListener('click', async ()=>{
   if(!rsImg) return;
   $('rs-apply').disabled = true; $('rs-apply').textContent = 'Resize ho raha hai...';
@@ -724,24 +756,60 @@ function ciResolveFormat(){
   return choice;
 }
 $('ci-format').addEventListener('change', ()=>{
-  $('ci-q-field').style.display = (ciResolveFormat()==='image/png') ? 'none' : 'block';
+  $('ci-q-field').style.display = (ciResolveFormat()==='image/png' || $('ci-exam-preset').value) ? 'none' : 'block';
 });
+$('ci-exam-preset').addEventListener('change', ()=>{
+  const val = $('ci-exam-preset').value;
+  $('ci-exam-note').style.display = val ? 'block' : 'none';
+  if(val){
+    $('ci-format').value = 'image/jpeg';
+    $('ci-q-field').style.display = 'none';
+  } else {
+    $('ci-q-field').style.display = (ciResolveFormat()==='image/png') ? 'none' : 'block';
+  }
+});
+async function compressToTargetKB(canvas, minKB, maxKB){
+  let best = null, bestDiff = Infinity;
+  for(let q=95; q>=10; q-=5){
+    const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg', q/100));
+    const kb = blob.size/1024;
+    if(kb <= maxKB){
+      if(kb >= minKB) return blob;
+      const diff = minKB - kb;
+      if(diff < bestDiff){ bestDiff = diff; best = blob; }
+      if(!best) best = blob;
+    }
+  }
+  return best;
+}
 $('ci-apply').addEventListener('click', async ()=>{
   if(!ciImg) return;
   $('ci-apply').disabled = true; $('ci-apply').textContent = 'Compress ho raha hai...';
-  const format = ciResolveFormat();
-  const ext = format==='image/png' ? 'png' : 'jpg';
-  const q = parseInt($('ci-q').value)/100;
-  const quality = format==='image/png' ? undefined : q;
-  $('ci-canvas').toBlob(async blob=>{
-    $('ci-orig').textContent = fmtBytes(ciFile.size);
-    $('ci-new').textContent = fmtBytes(blob.size);
-    $('ci-saved').textContent = Math.max(0, Math.round((1-blob.size/ciFile.size)*100))+'%';
-    $('ci-stats').style.display='flex';
-    await saveOrShareBlob(blob, 'osp-compressed.'+ext, true);
-    $('ci-apply').disabled = false; $('ci-apply').textContent = 'Compress Karein';
-    showInterstitialThenPrepareNext();
-  }, format, quality);
+  const presetVal = $('ci-exam-preset').value;
+  let blob, ext;
+  if(presetVal){
+    const [minKB, maxKB] = presetVal.split('-').map(Number);
+    blob = await compressToTargetKB($('ci-canvas'), minKB, maxKB);
+    ext = 'jpg';
+    if(!blob || blob.size/1024 > maxKB){
+      alert('Is photo ko '+minKB+'-'+maxKB+' KB tak nahi laya ja saka. Pehle Resize tab mein jaakar photo ka pixel size chhota karein, phir yahan dobara try karein.');
+      $('ci-apply').disabled = false; $('ci-apply').textContent = 'Compress Karein';
+      return;
+    }
+  } else {
+    const format = ciResolveFormat();
+    ext = format==='image/png' ? 'png' : 'jpg';
+    const q = parseInt($('ci-q').value)/100;
+    const quality = format==='image/png' ? undefined : q;
+    blob = await new Promise(res=>$('ci-canvas').toBlob(res, format, quality));
+  }
+  $('ci-orig').textContent = fmtBytes(ciFile.size);
+  $('ci-new').textContent = fmtBytes(blob.size);
+  $('ci-saved').textContent = Math.max(0, Math.round((1-blob.size/ciFile.size)*100))+'%';
+  $('ci-stats').style.display='flex';
+  await saveOrShareBlob(blob, 'osp-compressed.'+ext, true);
+  $('ci-apply').disabled = false; $('ci-apply').textContent = 'Compress Karein';
+  showInterstitialThenPrepareNext();
 });
 
 let cbFiles = [];
