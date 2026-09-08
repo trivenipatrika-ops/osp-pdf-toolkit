@@ -49,6 +49,10 @@ jobs:
           }
           GRADLE_EOF
 
+      - name: Bump minSdkVersion for Start.io compatibility
+        run: |
+          sed -i 's/minSdkVersion = 22/minSdkVersion = 23/' android/variables.gradle
+
       - name: Write StartIoPlugin.java (custom Capacitor plugin)
         run: |
           mkdir -p android/app/src/main/java/com/osp/pdftoolkit
