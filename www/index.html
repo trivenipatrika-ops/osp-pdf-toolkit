@@ -492,37 +492,61 @@ async function saveOrShareBlob(blob, filename, isImage){
   }
 }
 
-/* ============ AdMob ============ */
-/* IMPORTANT: AD_TEST_MODE=true dikhata hai Google ke SAFE TEST ads - inpar jitni baar chahe click karein, koi risk nahi.
-   Jab APP PLAY STORE PAR FINAL PUBLISH karni ho, sirf tab isse false karein, taaki asli ads aur asli kamai shuru ho.
-   AD_TEST_MODE=true rehte hue asli ads bilkul nahi dikhengi - yeh jaan-boojh kar kiya gaya hai, taaki testing ke doraan
-   galti se apne hi ads par click hone se AdMob account band (ban) na ho jaaye. */
+/* ============ Ads (Start.io ya AdMob - ek switch se badal sakte hain) ============ */
+/* AD_NETWORK: 'startio' - abhi isi se kamai hogi (Play Store account nahi hai).
+   Jab kabhi Play Store account mil jaaye, sirf 'startio' ko 'admob' kar dena - baaki sab kaam khud ho jayega. */
+const AD_NETWORK = 'startio';
+
+/* Start.io settings */
+/* STARTIO_TEST_MODE=true rehte hue sirf Start.io ke SAFE test ads dikhenge - jitna chahe click karein, risk nahi.
+   Jab pakka tasalli ho jaaye ki sab sahi chal raha hai, isse false kar dena taaki asli kamai shuru ho. */
+const STARTIO_TEST_MODE = true;
+const STARTIO_APP_ID = '208450951';
+
+/* AdMob settings (abhi istemal nahi ho raha, AD_NETWORK='admob' karne par kaam aayega) */
 const AD_TEST_MODE = false;
 const ADMOB_BANNER_ID = AD_TEST_MODE ? 'ca-app-pub-3940256099942544/6300978111' : 'ca-app-pub-1247625335902562/2647393333';
 const ADMOB_INTERSTITIAL_ID = AD_TEST_MODE ? 'ca-app-pub-3940256099942544/1033173712' : 'ca-app-pub-1247625335902562/5820351587';
+
 let interstitialReady = false;
 async function initAds(){
   if(!isNativeApp()) return;
   try{
-    const { AdMob } = window.Capacitor.Plugins;
-    await AdMob.initialize();
-    await AdMob.showBanner({ adId: ADMOB_BANNER_ID, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 60 });
+    if(AD_NETWORK === 'startio'){
+      const { StartIo } = window.Capacitor.Plugins;
+      await StartIo.initialize({ appId: STARTIO_APP_ID, testMode: STARTIO_TEST_MODE });
+      await StartIo.showBanner();
+    } else {
+      const { AdMob } = window.Capacitor.Plugins;
+      await AdMob.initialize();
+      await AdMob.showBanner({ adId: ADMOB_BANNER_ID, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 60 });
+    }
     await prepareInterstitial();
-  }catch(e){ console.warn('AdMob init failed', e); }
+  }catch(e){ console.warn('Ad init failed', e); }
 }
 async function prepareInterstitial(){
   if(!isNativeApp()) return;
   try{
-    const { AdMob } = window.Capacitor.Plugins;
-    await AdMob.prepareInterstitial({ adId: ADMOB_INTERSTITIAL_ID });
+    if(AD_NETWORK === 'startio'){
+      const { StartIo } = window.Capacitor.Plugins;
+      await StartIo.prepareInterstitial();
+    } else {
+      const { AdMob } = window.Capacitor.Plugins;
+      await AdMob.prepareInterstitial({ adId: ADMOB_INTERSTITIAL_ID });
+    }
     interstitialReady = true;
   }catch(e){ interstitialReady = false; }
 }
 async function showInterstitialThenPrepareNext(){
   if(!isNativeApp() || !interstitialReady) return;
   try{
-    const { AdMob } = window.Capacitor.Plugins;
-    await AdMob.showInterstitial();
+    if(AD_NETWORK === 'startio'){
+      const { StartIo } = window.Capacitor.Plugins;
+      await StartIo.showInterstitial();
+    } else {
+      const { AdMob } = window.Capacitor.Plugins;
+      await AdMob.showInterstitial();
+    }
   }catch(e){}
   interstitialReady = false;
   prepareInterstitial();
