@@ -35,6 +35,150 @@ jobs:
         run: |
           sed -i 's#</application>#    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-1247625335902562~3475213673"/>\n    </application>#' android/app/src/main/AndroidManifest.xml
 
+      - name: Add Start.io permission and App ID to AndroidManifest
+        run: |
+          sed -i 's#<application#    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />\n    <application#' android/app/src/main/AndroidManifest.xml
+          sed -i 's#</application>#    <meta-data android:name="com.startapp.sdk.APPLICATION_ID" android:value="208450951"/>\n    </application>#' android/app/src/main/AndroidManifest.xml
+
+      - name: Add Start.io SDK gradle dependency
+        run: |
+          cat >> android/app/build.gradle << 'GRADLE_EOF'
+
+          dependencies {
+              implementation 'com.startapp:inapp-sdk:5.+'
+          }
+          GRADLE_EOF
+
+      - name: Write StartIoPlugin.java (custom Capacitor plugin)
+        run: |
+          mkdir -p android/app/src/main/java/com/osp/pdftoolkit
+          cat > android/app/src/main/java/com/osp/pdftoolkit/StartIoPlugin.java << 'JAVA_EOF'
+package com.osp.pdftoolkit;
+
+import android.graphics.Color;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+
+import com.startapp.sdk.adsbase.Ad;
+import com.startapp.sdk.adsbase.StartAppAd;
+import com.startapp.sdk.adsbase.StartAppSDK;
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
+import com.startapp.sdk.ads.banner.Banner;
+import com.startapp.sdk.ads.banner.BannerListener;
+
+@CapacitorPlugin(name = "StartIo")
+public class StartIoPlugin extends Plugin {
+
+    private StartAppAd interstitialAd;
+    private Banner bannerView;
+    private boolean interstitialReady = false;
+
+    @PluginMethod
+    public void initialize(PluginCall call) {
+        try {
+            String appId = call.getString("appId");
+            boolean testMode = Boolean.TRUE.equals(call.getBoolean("testMode", false));
+            StartAppSDK.init(getActivity(), appId, false);
+            StartAppSDK.setTestAdsEnabled(testMode);
+            StartAppAd.disableSplash();
+            interstitialAd = new StartAppAd(getActivity());
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("StartIo initialize failed: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void showBanner(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            try {
+                if (bannerView != null) {
+                    call.resolve();
+                    return;
+                }
+                bannerView = new Banner(getActivity(), new BannerListener() {
+                    @Override
+                    public void onReceiveAd(View view) {}
+                    @Override
+                    public void onFailedToReceiveAd(View view) {}
+                    @Override
+                    public void onImpression(View view) {}
+                    @Override
+                    public void onClick(View view) {}
+                });
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+                params.gravity = Gravity.BOTTOM;
+                bannerView.setBackgroundColor(Color.parseColor("#17212B"));
+                getActivity().addContentView(bannerView, params);
+                call.resolve();
+            } catch (Exception e) {
+                call.reject("showBanner failed: " + e.getMessage());
+            }
+        });
+    }
+
+    @PluginMethod
+    public void prepareInterstitial(PluginCall call) {
+        if (interstitialAd == null) {
+            call.reject("StartIo not initialized yet");
+            return;
+        }
+        interstitialAd.loadAd(new AdEventListener() {
+            @Override
+            public void onReceiveAd(Ad ad) {
+                interstitialReady = true;
+                call.resolve();
+            }
+            @Override
+            public void onFailedToReceiveAd(Ad ad) {
+                interstitialReady = false;
+                call.reject("Failed to load Start.io interstitial");
+            }
+        });
+    }
+
+    @PluginMethod
+    public void showInterstitial(PluginCall call) {
+        if (interstitialAd == null || !interstitialReady) {
+            call.reject("Interstitial not ready");
+            return;
+        }
+        getActivity().runOnUiThread(() -> {
+            interstitialAd.showAd();
+        });
+        interstitialReady = false;
+        call.resolve();
+    }
+}
+JAVA_EOF
+
+      - name: Register StartIoPlugin in MainActivity.java
+        run: |
+          cat > android/app/src/main/java/com/osp/pdftoolkit/MainActivity.java << 'JAVA_EOF'
+package com.osp.pdftoolkit;
+
+import android.os.Bundle;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(StartIoPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+}
+JAVA_EOF
+
       - name: Decode app icon and splash screen
         run: |
           mkdir -p assets
