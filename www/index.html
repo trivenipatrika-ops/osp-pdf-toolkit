@@ -18,7 +18,8 @@
   body{
     background:var(--bg); color:var(--text);
     font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-    padding-bottom:78px;
+    padding-left:62px;
+    padding-bottom:64px;
   }
 
   header.app-header{
@@ -104,18 +105,18 @@
 
   .note{color:var(--muted); font-size:12px; line-height:1.6; margin-top:12px;}
 
-  nav.bottom-nav{
-    position:fixed; bottom:0; left:0; right:0; z-index:30;
-    display:flex; background:var(--surface); border-top:1px solid var(--line);
-    padding-bottom:env(safe-area-inset-bottom);
+  nav.side-nav{
+    position:fixed; top:0; left:0; bottom:0; width:62px; z-index:15;
+    display:flex; flex-direction:column; background:var(--surface); border-right:1px solid var(--line);
+    padding-top:76px;
   }
-  nav.bottom-nav button{
-    flex:1; background:none; border:none; padding:10px 0 8px; color:var(--muted);
-    font-size:12px; display:flex; flex-direction:column; align-items:center; gap:3px;
+  nav.side-nav button{
+    background:none; border:none; padding:14px 4px; color:var(--muted);
+    font-size:10px; line-height:1.25; display:flex; flex-direction:column; align-items:center; gap:4px;
   }
-  nav.bottom-nav button.active{color:var(--gold-2); font-weight:700;}
-  nav.bottom-nav button.active svg{color:var(--gold-2);}
-  nav.bottom-nav button svg{color:var(--muted);}
+  nav.side-nav button.active{color:var(--gold-2); font-weight:700; background:var(--surface-2);}
+  nav.side-nav button.active svg{color:var(--gold-2);}
+  nav.side-nav button svg{color:var(--muted);}
 
   .toast{
     position:fixed; bottom:82px; left:50%; transform:translateX(-50%);
@@ -385,7 +386,7 @@
 
 </main>
 
-<nav class="bottom-nav">
+<nav class="side-nav">
   <button class="navbtn active" data-tab="pdf" onclick="showMainTab('pdf')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
     PDF
