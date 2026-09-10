@@ -61,9 +61,9 @@ jobs:
 
       - name: Write StartIoPlugin.java (custom Capacitor plugin)
         run: |
-          mkdir -p android/app/src/main/java/com/osp/pdftoolkit
-          cat > android/app/src/main/java/com/osp/pdftoolkit/StartIoPlugin.java << 'JAVA_EOF'
-          package com.osp.pdftoolkit;
+          mkdir -p android/app/src/main/java/com/osp/pdftoolkitapp
+          cat > android/app/src/main/java/com/osp/pdftoolkitapp/StartIoPlugin.java << 'JAVA_EOF'
+          package com.osp.pdftoolkitapp;
 
           import android.graphics.Color;
           import android.view.Gravity;
@@ -175,8 +175,8 @@ jobs:
 
       - name: Register StartIoPlugin in MainActivity.java
         run: |
-          cat > android/app/src/main/java/com/osp/pdftoolkit/MainActivity.java << 'JAVA_EOF'
-          package com.osp.pdftoolkit;
+          cat > android/app/src/main/java/com/osp/pdftoolkitapp/MainActivity.java << 'JAVA_EOF'
+          package com.osp.pdftoolkitapp;
 
           import android.os.Bundle;
           import com.getcapacitor.BridgeActivity;
