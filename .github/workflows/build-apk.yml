@@ -25,6 +25,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Download JS libraries for offline use (app must not depend on internet for core features)
+        run: |
+          curl -L -o www/pdf-lib.min.js https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js
+          curl -L -o www/jspdf.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+          curl -L -o www/jszip.min.js https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
+
       - name: Add Android platform
         run: npx cap add android
 
