@@ -1,5 +1,5 @@
 {
-  "appId": "com.osp.pdftoolkit",
+  "appId": "com.osp.pdftoolkitapp",
   "appName": "OSP PDF Toolkit",
   "webDir": "www",
   "bundledWebRuntime": false
