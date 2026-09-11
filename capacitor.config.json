@@ -2,5 +2,14 @@
   "appId": "com.osp.pdftoolkitapp",
   "appName": "OSP PDF Toolkit",
   "webDir": "www",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "launchAutoHide": false,
+      "backgroundColor": "#0B1F33",
+      "showSpinner": false,
+      "androidSplashResourceName": "splash"
+    }
+  }
 }
